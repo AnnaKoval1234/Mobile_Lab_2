@@ -13,7 +13,7 @@ export default function MarkerList({ markers, onMarkerPress }: Props) {
       {markers.map((marker) => (
         <Marker
           key={marker.id}
-          coordinate={marker.coordinate}
+          coordinate={{latitude: marker.latitude, longitude: marker.longitude}}
           onPress={() => onMarkerPress(marker)}
         />
       ))}

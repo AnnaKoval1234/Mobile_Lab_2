@@ -1,30 +1,20 @@
-import React, { useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
 import MapView, { LongPressEvent } from 'react-native-maps';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { MarkerData } from '@/types';
 import MarkerList from '@/components/MarkerList';
-import { MarkerContext } from '@/contexts/MarkerContext';
-import { useState } from 'react';
-import { useDatabase } from '../contexts/DatabaseContext';
+import { useDatabase } from '@/contexts/DatabaseContext';
 
 export default function Index() {
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const router = useRouter();
   const db = useDatabase();
-  const state = useContext(MarkerContext);
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     if (!db.isLoading) {
-  //       loadMarkers();
-  //     }
-  //   }, [db.isLoading])
-  // );
 
   const loadMarkers = async () => {
     try {
       const result = await db.getMarkers();
+      console.log(result)
       setMarkers(result);
     } catch (error) {
       console.error('Ошибка при загрузке маркеров:', error);
@@ -32,23 +22,24 @@ export default function Index() {
     }
   };
 
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!db.isLoading) {
+        loadMarkers();
+      }
+    }, [db.isLoading])
+  );
 
   const handleLongPress =  async (event: LongPressEvent) => {
-
     try {
-      console.log(markers)
       const {coordinate}  = event.nativeEvent;
-  
-      db.addMarker(coordinate.latitude, coordinate.longitude);
-      loadMarkers();
+      await db.addMarker(coordinate.latitude, coordinate.longitude);
+      await loadMarkers();
     } catch (error) {
-      Alert.alert('Ошибка', 'Не удалось добавить метку. Попробуйте снова.');
+      console.error('Ошибка при добавлении маркеров:', error);
+      Alert.alert('Ошибка', 'Не удалось добавить маркер.');
     }
   };
-
-
-
-
 
   return (
     <View style={styles.container}>
@@ -63,7 +54,14 @@ export default function Index() {
         onLongPress={handleLongPress}>
           <MarkerList
             markers={markers}
-            onMarkerPress={(m) => router.push({pathname: "/marker/[id]", params: { id: m.id }})}>
+            onMarkerPress={(m) => {
+              try {
+                router.push({pathname: "/marker/[id]", params: { id: m.id }})
+              } catch (error) {
+                console.error('Ошибка при открытии деталей маркера:', error);
+                Alert.alert('Ошибка', 'Не удалось открыть детали маркера.');
+              }
+            }}>
           </MarkerList>
       </MapView>
     </View>

@@ -43,7 +43,7 @@ export interface DatabaseContextType {
     // ... реализация методов контекста
   
     
-const addMarker = (latitude: number, longitude: number): Promise<number> => {
+const addMarker = async (latitude: number, longitude: number): Promise<number> => {
     if (!db) throw new Error('База данных не инициализирована');
         return db.runAsync(`INSERT INTO markers (latitude, longitude) 
                         VALUES (?, ?);`, 
