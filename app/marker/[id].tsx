@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { View, Button, StyleSheet, Alert } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ImagePickerResult, launchImageLibraryAsync } from 'expo-image-picker';
 import { MarkerData, ImageData } from '../../types';
@@ -41,10 +41,10 @@ export default function MarkerDetailScreen() {
     }
   };
 
-    useEffect(() => {
-      loadMarker();
-      loadImages();
-    }, []);
+  useEffect(() => {
+    loadMarker();
+    loadImages();
+  }, []);
 
   const addImage = async () => {
     try {
@@ -82,8 +82,12 @@ export default function MarkerDetailScreen() {
   return (
     <View style={styles.container}>
       <ImageList images={images!} onDelete={deleteImage}/>
-      <Button title="Добавить изображение" onPress={addImage}/>
-      <Button title="Удалить маркер" onPress={() => handleDeleteMarker()} color="#dc3545"/>
+      <View style={styles.container2}>
+        <Button title="Добавить изображение" onPress={addImage}/>
+      </View>
+      <View style={styles.container2}>
+        <Button title="Удалить маркер" onPress={() => handleDeleteMarker()} color="#dc3545"/>
+      </View>
     </View>
   );
 };
@@ -93,7 +97,9 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  text: {
-    textAlign: 'center',
-  }
+  container2: {
+    flex: 0,
+    marginHorizontal: 10,
+    paddingVertical: 5,
+  },
 });

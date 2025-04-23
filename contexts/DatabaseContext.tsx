@@ -22,7 +22,7 @@ export interface DatabaseContextType {
   export const useDatabase = () => {
     const context = useContext(DatabaseContext);
     if (!context) {
-      throw new Error('useDatabase must be used within a DatabaseProvider');
+      throw new Error('useDatabase должна использоваться с DatabaseProvider');
     }
     return context;
   };
