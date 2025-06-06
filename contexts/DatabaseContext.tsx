@@ -43,56 +43,56 @@ export interface DatabaseContextType {
     // ... реализация методов контекста
   
     
-const addMarker = async (latitude: number, longitude: number): Promise<number> => {
+  const addMarker = async (latitude: number, longitude: number): Promise<number> => {
     if (!db) throw new Error('База данных не инициализирована');
-        return db.runAsync(`INSERT INTO markers (latitude, longitude) 
+    return db.runAsync(`INSERT INTO markers (latitude, longitude) 
                         VALUES (?, ?);`, 
                         latitude, longitude).then(result => result.lastInsertRowId);
-};
+  };
 
-const deleteMarker = async (id: number): Promise<void> => {
+  const deleteMarker = async (id: number): Promise<void> => {
     if (!db) throw new Error('База данных не инициализирована');
     await db.runAsync(`DELETE FROM markers WHERE id = ?;`, id);
-};
+  };
 
-const getMarkers = async (): Promise<MarkerData[]> => {
+  const getMarkers = async (): Promise<MarkerData[]> => {
     if (!db) throw new Error('База данных не инициализирована');
     return db.getAllAsync<MarkerData>(`SELECT * FROM markers;`);
-};
+  };
 
-const addImage = async (markerId: number, uri: string): Promise<void> => {
+  const addImage = async (markerId: number, uri: string): Promise<void> => {
     if (!db) throw new Error('База данных не инициализирована');
     await db.runAsync(`INSERT INTO marker_images (marker_id, uri) 
                         VALUES (?, ?);`, 
                         markerId, uri);
-};
+  };
 
-const deleteImage = async (id: number): Promise<void> => {
+  const deleteImage = async (id: number): Promise<void> => {
     if (!db) throw new Error('База данных не инициализирована');
-  await db.runAsync(`DELETE FROM marker_images WHERE id = ?;`, id);
-};
+    await db.runAsync(`DELETE FROM marker_images WHERE id = ?;`, id);
+  };
 
-const getMarkerImages = async (markerId: number): Promise<any[]> => {
+  const getMarkerImages = async (markerId: number): Promise<any[]> => {
     if (!db) throw new Error('База данных не инициализирована');
     return db.getAllAsync<ImageData>(`SELECT * FROM marker_images
         WHERE marker_id = ?;`,
         markerId);
-    };
+  };
 
-    const contextValue = {
-        addMarker,
-        deleteMarker,
-        getMarkers,
-        addImage,
-        deleteImage,
-        getMarkerImages,
-        isLoading,
-        error
-      };
+  const contextValue = {
+    addMarker,
+    deleteMarker,
+    getMarkers,
+    addImage,
+    deleteImage,
+    getMarkerImages,
+    isLoading,
+    error
+  };
 
-    return (
+  return (
       <DatabaseContext.Provider value={contextValue}>
         {children}
       </DatabaseContext.Provider>
     );
-  };
+};

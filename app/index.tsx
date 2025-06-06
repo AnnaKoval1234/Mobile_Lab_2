@@ -1,15 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Alert } from 'react-native';
-import MapView, { LongPressEvent } from 'react-native-maps';
+import MapView, { Circle, LongPressEvent } from 'react-native-maps';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { MarkerData } from '@/types';
 import MarkerList from '@/components/MarkerList';
 import { useDatabase } from '@/contexts/DatabaseContext';
+import * as Location from "expo-location";
+import * as Notifications from "expo-notifications"
+import { calculateDistance, requestLocationPermissions, startLocationUpdates } from '@/services/location';
+import { NotificationManager } from '@/services/notifications';
 
 export default function Index() {
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const router = useRouter();
   const db = useDatabase();
+
+  const [userLocation, setUserLocation] = useState<Location.LocationObjectCoords> ({
+    latitude: 0,
+    longitude: 0
+  } as Location.LocationObjectCoords);
+  const PROXIMITY_THRESHOLD = 300;
+
 
   const loadMarkers = async () => {
     try {
@@ -41,6 +52,62 @@ export default function Index() {
     }
   };
 
+  useEffect(() => {
+    let locationSubscription: Location.LocationSubscription;
+
+    const setupLocation = async () => {
+      try {
+        await requestLocationPermissions();
+        locationSubscription = await startLocationUpdates((location) => {
+          setUserLocation(location.coords); // Обновить состояние местоположения
+        });
+      } catch (error) {
+        console.error("Ошибка геолокации: ", error);
+      }
+    };
+
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldShowAlert: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+    NotificationManager.requestNotificationPermissions();
+
+    setupLocation();
+
+    return () => {
+      if (locationSubscription) {
+        locationSubscription.remove();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    checkProximity();
+  }, [userLocation]);
+
+  const checkProximity = () => {
+    markers.forEach(async marker => {
+      const distance = calculateDistance(
+        userLocation.latitude,
+        userLocation.longitude,
+        marker.latitude,
+        marker.longitude
+      );
+
+      console.log(distance)
+      if (distance <= PROXIMITY_THRESHOLD) {
+        await NotificationManager.showNotification(marker);
+      } else {
+        await NotificationManager.removeNotification(marker.id);
+      }
+    });
+  };
+
   return (
     <View style={styles.container}>
       <MapView
@@ -51,7 +118,15 @@ export default function Index() {
           latitudeDelta: 0.0922,
           longitudeDelta: 0.0421,
         }}
+        showsUserLocation={true}
         onLongPress={handleLongPress}>
+        {userLocation && (
+                    <Circle
+                        center={userLocation}
+                        radius={PROXIMITY_THRESHOLD}
+                        strokeColor='#FF3B30'
+                    />
+                )}
           <MarkerList
             markers={markers}
             onMarkerPress={(m) => {
