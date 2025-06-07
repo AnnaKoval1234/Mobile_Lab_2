@@ -19,14 +19,9 @@ export interface LocationConfig {
   distanceInterval: number;  // Минимальное расстояние (в метрах) между обновлениями
 }
 
-export interface LocationState {
-  location: Location.LocationObject | null;
-  errorMsg: string | null;
-}
-
 export interface ActiveNotification {
-  markerId: number;
-  notificationId: string;
-  timestamp: number;
+  markerId: number; // ссылка на маркер
+  notificationId: string; // ссылка на уведомление
+  timestamp: number; // время
 }
 

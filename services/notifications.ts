@@ -1,12 +1,11 @@
 import { ActiveNotification, MarkerData } from '@/types';
 import * as Notifications from 'expo-notifications';
 
-class NotificationManagerImpl {
+class NotificationManager {
   private activeNotifications: Map<number, ActiveNotification>;
 
   constructor() {
     this.activeNotifications = new Map();
-    console.log("Я родился")
   }
 
   async requestNotificationPermissions() {
@@ -18,11 +17,8 @@ class NotificationManagerImpl {
 
   async showNotification(marker: MarkerData): Promise<void> {
     if (this.activeNotifications.has(marker.id)) {
-      console.log("Дубликат")
       return; // Предотвращаем дубликаты
     }
-
-    console.log("Уведомление")
 
     const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
@@ -39,18 +35,13 @@ class NotificationManagerImpl {
     });
   }
 
-  async removeNotification(markerId: number): Promise<void> {
-    const notification = this.activeNotifications.get(markerId);
+  async removeNotification(marker: MarkerData): Promise<void> {
+    const notification = this.activeNotifications.get(marker.id);
     if (notification) {
-      console.log("Потрачено")
-      // await Notifications.cancelScheduledNotificationAsync(notification.notificationId);
       await Notifications.dismissNotificationAsync(notification.notificationId)
-      this.activeNotifications.delete(markerId);
-    } else {
-      console.log("Не потрачено")
-    }
+      this.activeNotifications.delete(marker.id);
+    } 
   }
-
 
   clearAll() {
     this.activeNotifications.forEach(async (id) => {
@@ -60,4 +51,4 @@ class NotificationManagerImpl {
   }
 }
 
-export const NotificationManager = new NotificationManagerImpl();
+export const MyNotificationManager = new NotificationManager();

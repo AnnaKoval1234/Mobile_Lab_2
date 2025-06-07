@@ -8,7 +8,7 @@ import { useDatabase } from '@/contexts/DatabaseContext';
 import * as Location from "expo-location";
 import * as Notifications from "expo-notifications"
 import { calculateDistance, requestLocationPermissions, startLocationUpdates } from '@/services/location';
-import { NotificationManager } from '@/services/notifications';
+import { MyNotificationManager } from '@/services/notifications';
 
 export default function Index() {
   const [markers, setMarkers] = useState<MarkerData[]>([]);
@@ -75,7 +75,7 @@ export default function Index() {
         shouldShowList: true,
       }),
     });
-    NotificationManager.requestNotificationPermissions();
+    MyNotificationManager.requestNotificationPermissions();
 
     setupLocation();
 
@@ -99,11 +99,11 @@ export default function Index() {
         marker.longitude
       );
 
-      console.log(distance)
+
       if (distance <= PROXIMITY_THRESHOLD) {
-        await NotificationManager.showNotification(marker);
+        await MyNotificationManager.showNotification(marker);
       } else {
-        await NotificationManager.removeNotification(marker.id);
+        await MyNotificationManager.removeNotification(marker);
       }
     });
   };
